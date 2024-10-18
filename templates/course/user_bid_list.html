@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | Adisia{% endblock title %}
+{% load static %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">My Bids</li>
+    </ol>
+</nav>
+
+{% if request.user.is_advertiser %}
+<div class="manage-wrap">
+    <a class="btn btn-sm btn-primary" href="{% url 'add_bid' %}"><i class="fas fa-plus"></i> Add New Bid</a>
+</div>
+{% endif %}
+
+{% if request.user.is_content_creator %}
+    <div class="title-1"><i class="fas fa-briefcase"></i> My Applied Bids</div>
+{% endif %}
+
+{% if request.user.is_advertiser %}
+    <div class="title-1"><i class="fas fa-briefcase"></i> My Created Bids</div>
+{% endif %}
+
+<br>
+<br>
+
+{% include 'snippets/messages.html' %}
+
+<div class="table-responsive table-shadow table-light table-striped m-0 mt-4">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Bid Title</th>
+                <th>Bid Code</th>
+                <th>Category</th>
+                <th>Deadline</th>
+                {% if request.user.is_advertiser %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% if request.user.is_content_creator %}
+                {% for bid in bids %}
+                <tr>
+                    <td>{{ forloop.counter }}.</td>
+                    <td><a href="{{ bid.get_absolute_url }}">{{ bid.title }}</a></td>
+                    <td>{{ bid.code }}</td>
+                    <td>{{ bid.category.title }}</td>
+                    <td>{{ bid.deadline|date:"Y-m-d" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <span class="text-danger">No Applied Bids.</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+
+            {% if request.user.is_advertiser %}
+                {% for bid in bids %}
+                <tr>
+                    <td>{{ forloop.counter }}.</td>
+                    <td><a href="{{ bid.get_absolute_url }}">{{ bid.title }}</a></td>
+                    <td>{{ bid.code }}</td>
+                    <td>{{ bid.category.title }}</td>
+                    <td>{{ bid.deadline|date:"Y-m-d" }}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu position-fixed">
+                                <li><a class="dropdown-item" href="{% url 'edit_bid' bid.pk %}"><i class="fas fa-edit"></i> Update</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'delete_bid' bid.pk %}"><i class="fas fa-trash-alt"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <span class="text-danger">No Created Bids.</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% if bids.paginator.page_range|length > 1 %}
+<div class="content-center">
+    <div class="pagination">
+        <a href="?page=1">&laquo;</a>
+        {% for i in bids.paginator.page_range %}
+            {% if i == bids.number %}
+                <a class="pagination-active" href="?page={{ i }}"><b>{{ i }}</b></a>
+            {% else %}
+                <a href="?page={{ i }}">{{ i }}</a>
+            {% endif %}
+        {% endfor %}
+        <a href="?page={{ bids.paginator.num_pages }}">&raquo;</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock content %}

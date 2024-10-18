@@ -22,7 +22,7 @@
     <div class="col-md-3 mx-auto">
         <div class="card  p-2">
             <div class="text-center">
-                <img src="{{ user.picture.url }}" class="w-100">
+                <img src="{{ user.get_picture }}" class="w-100">
                 <ul class="px-2 list-unstyled">
                     <li>{{ user.get_full_name|title }}</li>
                     <li><strong>Last login: </strong>{{ user.last_login|date }}</li>
@@ -71,7 +71,7 @@
                 {% endif %} -->
     
                 {% if user.is_lecturer %}
-                <p class="fw-bold"><i class="fas fa-book-open"></i> My Courses</p>
+                <p class="fw-bold"><i class="fas fa-book-open"></i> My Bids</p>
                 {% if courses %}
                 <ul>
                     {% for course in courses %}
@@ -110,13 +110,13 @@
     
                 <hr>
                 <p class="fw-bold"><i class="fa fa-calendar-day"></i> Important Dates</p>
-                <div class="dashboard-description">
+                <!-- <div class="dashboard-description">
                     <p><strong>Last login:</strong> {{ user.last_login }}</p>
                     {% if current_semester and current_session %}
                     <p><strong>Academic Year:</strong> {{ current_semester }} Semester {{ current_session }}</p>
                     {% endif %}
                     <p><strong>Registered Date:</strong> {{ user.date_joined|date }}</p>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

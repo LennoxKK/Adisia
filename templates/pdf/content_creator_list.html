@@ -1,0 +1,93 @@
+{% block content %}
+<style>
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table th, .table td {
+    padding: 8px;
+    border: 1px solid #ddd; /* Add thin borders for separation */
+    text-align: left;
+  }
+
+  .table th {
+    background-color: #f2f2f2;
+  }
+
+  .title-1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  .text-danger {
+    color: red;
+  }
+
+  a {
+    color: black;
+    text-decoration: none;
+  }
+</style>
+
+<p class="title-1">Content Creators</p>
+
+<div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>ID No.</th>
+        <th>Full Name</th>
+        <th>YouTube Channel</th>
+        <th>Email</th>
+        <th>Mob No.</th>
+        <th>Address/City</th>
+        {% if request.user.is_superuser %}
+        <th>Action</th> <!-- Action column for superuser actions -->
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for content_creator in content_creators %}
+      <tr>
+        <td>{{ forloop.counter }}.</td>
+        <td>{{ content_creator.username }}</td>
+        <td><a href="{% url 'profile_single' content_creator.id %}">{{ content_creator.get_full_name }}</a></td>
+        <td>{{ content_creator.youtube_channel_name }}</td>
+        <td>{{ content_creator.email }}</td>
+        <td>{{ content_creator.phone }}</td>
+        <td>{{ content_creator.address }}</td>
+        {% if request.user.is_superuser %}
+        <td>
+          <div class="dropdown">
+            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-ellipsis-vertical"></i>
+            </button>
+            <ul class="dropdown-menu position-fixed">
+              <li><a class="dropdown-item" href="{% url 'content_creator_edit' pk=content_creator.pk %}"><i class="fas fa-edit"></i> Update</a></li>
+              <li><a class="dropdown-item" target="_blank" href="{% url 'profile_single' content_creator.id %}?download_pdf=1"><i class="fas fa-download"></i> Download PDF</a></li>
+              <li><a class="dropdown-item text-danger" href="{% url 'content_creator_delete' pk=content_creator.pk %}"><i class="fas fa-trash-alt"></i> Delete</a></li>
+            </ul>
+          </div>
+        </td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7">
+          <span class="text-danger">No Content Creators found.</span>
+          {% if request.user.is_superuser %}
+          <a href="{% url 'add_content_creator' %}">
+            <i class="primary" style="font-size: 22px;">
+              Add Content Creator Now.
+            </i>
+          </a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock content %}

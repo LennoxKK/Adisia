@@ -7,7 +7,7 @@
 <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/">Home</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Students</li>
+      <li class="breadcrumb-item active" aria-current="page">Advertisers</li>
     </ol>
 </nav>
 
@@ -15,12 +15,12 @@
 
 {% if request.user.is_superuser %}
 <div class="manage-wrap">
-    <a class="btn btn-sm btn-primary" href="{% url 'add_student' %}"><i class="fas fa-plus"></i> Add Student</a>
+    <a class="btn btn-sm btn-primary" href="{% url 'add_student' %}"><i class="fas fa-plus"></i> Add Advertiser</a>
     <a class="btn btn-sm btn-primary" target="_blank" href="{% url 'student_list_pdf' %}"><i class="fas fa-download"></i> Download pdf</a> <!--new-->
 </div>
 {% endif %}
 
-<div class="title-1"><i class="fas fa-user-graduate"></i>Students</div>
+<div class="title-1"><i class="fas fa-user-graduate"></i>Advertisers</div>
 <br>
 <br>
 
@@ -73,7 +73,7 @@
                     {% if request.user.is_superuser %}
                     <a href="{% url 'add_student' %}">
                     <i class="primary" style="font-size: 22px;">
-                       Add Student Now.
+                       Add Advertiser Now.
                     </i>
                     {% endif %}
                     </a>

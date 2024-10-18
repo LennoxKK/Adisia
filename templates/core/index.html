@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }} | Learning management system{% endblock title %}
+{% block title %}{{ title }} | Adisia {% endblock title %}
 {% load static %}
 
 {% block content %}
@@ -23,82 +23,167 @@
         justify-content: space-between;
     }
 
-    .card-header-ne .title {
-        vertical-align: middle;
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    .bg-light {
+        background-color: #f9f9f9;
     }
 </style>
 
 <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item active" aria-current="page">Home</li>
+        <li class="breadcrumb-item active" aria-current="page">Home</li>
     </ol>
 </nav>
 
-{% if request.user.is_superuser %}
-<div class="manage-wrap">
-    <a class="btn btn-primary" href="{% url 'add_item' %}"><i class="fas fa-plus"></i> Add New Post</a>
-</div>
-{% endif %}
-
-{% include 'snippets/messages.html' %}
-
-<div>
-    <div class="title-1">News &amp; Events</div>
-</div>
-
-<div class="col-md-2 ms-auto d-flex">
-    <div class="me-3">
-        <span class="color-indicator bg-primary"></span> News
-    </div>
+{% if request.user.is_advertiser or request.user.is_superuser %}
     <div>
-        <span class="color-indicator bg-purple"></span> Events
+        <h1>Top Advertisements</h1>
     </div>
-</div>
 
-<div class="container-fluid">
-    {% if items %}
-    <div class="row">
-        {% for item in items %}
-        <div class="col-md-4 mb-4">
-            <div class="bg-white border">
-                <div class="card-header-ne {% if item.posted_as == 'News' %}news{% else %}events{% endif %} p-2">
-                    <span class="p-0">
-                        {{ item.title|title }}
-                    </span>
-                    {% if request.user.is_superuser %}
-                    <div class="dropstart">
-                        <button class="btn btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v text-white"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'edit_post' pk=item.id %}"><i
-                                    class="fas fa-pencil-alt"></i> Edit</a>
-                            <a class="dropdown-item" href="{% url 'delete_post' pk=item.id %}"><i
-                                    class="fas fa-trash-alt"></i> Delete</a>
+    <div class="container-fluid">
+        {% if top_adverts %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Video</th>
+                    <th>Views</th>
+                    <th>Likes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for advert in top_adverts %}
+                <tr>
+                    <td>{{ advert.title|title }}</td>
+                    <td>{{ advert.description }}</td>
+                    <td>
+                        {% if advert.youtube_link %}
+                            <a href="{{ advert.youtube_link }}" target="_blank">Watch Video</a>
+                        {% else %}
+                            No Video
+                        {% endif %}
+                    </td>
+                    <td>{{ advert.views }}</td>
+                    <td>{{ advert.likes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+        <h4 class="text-center mt-5 py-5 text-muted">
+            <i class="fas fa-balance-scale me-2"></i> No available adverts at this moment.
+        </h4>
+        {% endif %}
+    </div>
+
+{% elif request.user.is_content_creator %}
+    <div>
+        <h1>Available Bids</h1>
+    </div>
+
+    <div class="container-fluid">
+        {% if bids %}
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for bid in bids %}
+            <div class="col">
+                <div class="card">
+                    <img src="{% static 'img/background.png' %}" class="card-img-top" alt="{{ bid.title|title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ bid.title|title }}</h5>
+                        <p class="card-text">{{ bid.summary }}</p>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-danger">{{ bid.deadline|timeuntil }} remaining!</span>
+                            <button type="button" class="btn btn-primary applyBtn" data-bid-id="{{ bid.id }}">Apply</button>
                         </div>
                     </div>
-                    {% endif %}
                 </div>
-
-                <div class="p-2 my-2" style="min-height: 120px;">{{ item.summary }}</div>
-
-                <div class="bg-light p-1 small text-secondary text-end pe-3">
-                    <i class="fa fa-calendar small unstyled"></i>
-                    {{ item.updated_date|timesince }} ago
-                </div>
-
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
+
+        {% else %}
+        <h4 class="text-center mt-5 py-5 text-muted">
+            <i class="fas fa-balance-scale me-2"></i> No available bids at this moment.
+        </h4>
+        {% endif %}
     </div>
 
-    {% else %}
+{% else %}
     <h4 class="text-center mt-5 py-5 text-muted">
-        <i class="fa-regular fa-folder-open me-2"></i> School news and events will appear here.
+        <i class="fas fa-balance-scale me-2"></i> You do not have access to this section.
     </h4>
+{% endif %}
 
-    {% endif %}
-
+<!-- Modal Structure (Optional) -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirm Application</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to apply for this bid?</p>
+                <p id="modalBidDetails"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmApplyBtn">Yes, Apply</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Form to apply (hidden) -->
+<form id="applyForm" method="post">
+    {% csrf_token %}
+    <input type="submit" placeholder="Submit" style="display: none;">
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var confirmApplyBtn = document.getElementById('confirmApplyBtn');
+        var applyForm = document.getElementById('applyForm');
+        var modalBidDetails = document.getElementById('modalBidDetails');
+
+        document.querySelectorAll('.applyBtn').forEach(button => {
+            button.addEventListener('click', function() {
+                var bidId = this.getAttribute('data-bid-id');
+
+                // Update modal details
+                modalBidDetails.textContent = `Bid ID: ${bidId}`;
+
+                // Update the form action with the correct bid ID
+                applyForm.action = "{% url 'sub-application' 'bid_id' %}".replace('bid_id', bidId);
+
+                // Show the modal
+                $('#confirmModal').modal('show');
+            });
+        });
+
+        // When the user confirms the apply action
+        confirmApplyBtn.addEventListener('click', function() {
+            // Submit the form
+            applyForm.submit();
+        });
+    });
+</script>
 
 {% endblock content %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Bid Allocated Successfully!</h1>
+<p>The following content creators have been allocated the bid: <strong>{{ bid.title }}</strong></p>
+
+<ul>
+    {% for creator, advert, stats in top_3_creators %}
+    <li>{{ creator.get_full_name }} (Total Stats: {{ stats }} - Advert: <a href="{{ advert.get_absolute_url }}">{{ advert.title }}</a>)</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'bid_detail' bid.slug %}" class="btn btn-primary">Go Back to Bid</a>
+{% endblock %}

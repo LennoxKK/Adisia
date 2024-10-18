@@ -5,30 +5,43 @@ import threading
 from core.utils import send_html_email
 
 
-def generate_password():
-    return get_user_model().objects.make_random_password()
+from django.contrib.auth import get_user_model
+
+def generate_password(length=8, allowed_chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()'):
+    """
+    Generate a random password for the user.
+
+    Args:
+        length (int): Length of the password. Default is 8.
+        allowed_chars (str): Characters allowed in the password. Default includes letters, digits, and special characters.
+
+    Returns:
+        str: A randomly generated password.
+    """
+    return get_user_model().objects.make_random_password(length=length, allowed_chars=allowed_chars)
 
 
-def generate_student_id():
-    # Generate a username based on first and last name and registration date
+
+def generate_content_creator_id():
+    # Generate a unique ID based on the current year and the number of content creators
     registered_year = datetime.now().strftime("%Y")
-    students_count = get_user_model().objects.filter(is_student=True).count()
-    return f"{settings.STUDENT_ID_PREFIX}-{registered_year}-{students_count}"
+    creators_count = get_user_model().objects.filter(is_content_creator=True).count()
+    return f"{settings.CONTENT_CREATOR_ID_PREFIX}-{registered_year}-{creators_count}"
 
 
-def generate_lecturer_id():
-    # Generate a username based on first and last name and registration date
+def generate_advertiser_id():
+    # Generate a unique ID based on the current year and the number of advertisers
     registered_year = datetime.now().strftime("%Y")
-    lecturers_count = get_user_model().objects.filter(is_lecturer=True).count()
-    return f"{settings.LECTURER_ID_PREFIX}-{registered_year}-{lecturers_count}"
+    advertisers_count = get_user_model().objects.filter(is_advertiser=True).count()
+    return f"{settings.ADVERTISER_ID_PREFIX}-{registered_year}-{advertisers_count}"
 
 
-def generate_student_credentials():
-    return generate_student_id(), generate_password()
+def generate_content_creator_credentials():
+    return generate_content_creator_id(), generate_password()
 
 
-def generate_lecturer_credentials():
-    return generate_lecturer_id(), generate_password()
+def generate_advertiser_credentials():
+    return generate_advertiser_id(), generate_password()
 
 
 class EmailThread(threading.Thread):
@@ -49,14 +62,16 @@ class EmailThread(threading.Thread):
 
 
 def send_new_account_email(user, password):
-    if user.is_student:
-        template_name = "accounts/email/new_student_account_confirmation.html"
+    if user.is_content_creator:
+        template_name = "accounts/email/new_content_creator_account_confirmation.html"
     else:
-        template_name = "accounts/email/new_lecturer_account_confirmation.html"
+        template_name = "accounts/email/new_advertiser_account_confirmation.html"
+    
     email = {
-        "subject": "Your Dj LMS account confirmation and credentials",
+        "subject": "Your Adisia account confirmation and credentials",
         "recipient_list": [user.email],
         "template_name": template_name,
         "context": {"user": user, "password": password},
     }
+    print(user,password)
     EmailThread(**email).start()

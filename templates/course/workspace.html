@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load custom_filters %}  <!-- Load your custom filters here -->
+{% block title %}Adverts List | Adverts Management System{% endblock title %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Adverts</li>
+    </ol>
+</nav>
+
+{% if request.user.is_content_creator or request.user.is_superuser %}  <!-- Updated condition -->
+<div class="manage-wrap">
+    <a class="btn btn-primary" href="{% url 'add_advert' %}"><i class="fas fa-plus"></i> Add Advert</a>
+</div>
+{% endif %}
+
+<div class="title-1"><i class="fas fa-bullhorn"></i> Advert List</div>
+<br><br>
+
+{% include 'snippets/messages.html' %}
+
+<div class="table-responsive table-shadow table-light table-striped m-0 mt-4">
+    <table class="table table-light">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Bid</th>
+                <th>Description</th>
+                <th>YouTube Video</th>
+                <th>Total Views & Likes</th>
+                {% if request.user.is_content_creator or request.user.is_superuser %}  <!-- Updated condition -->
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% if request.user.is_advertiser %}
+                {% if page_obj %}
+                    {% for advert in page_obj %}
+                    <tr>
+                        <td>{{ forloop.counter }}.</td>
+                        <td>
+                            <a class="a-list" href="{{ advert.get_absolute_url }}">
+                                {{ advert.title }}
+                            </a>
+                        </td>
+                        <td>{{ advert.bid.category.title }}</td>
+                        <td>{{ advert.bid }}</td>
+                        <td>{{ advert.description|truncatewords:10 }}</td>
+                        <td>
+                            {% if advert.youtube_link %}
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#videoModal{{ advert.slug }}">
+                                    <img src="https://img.youtube.com/vi/{{ advert.youtube_link|slice:"-11:" }}/hqdefault.jpg" alt="YouTube Thumbnail" style="width: 150px; height: 84px;">
+                                </a>
+                                <div class="modal fade" id="videoModal{{ advert.slug }}" tabindex="-1" aria-labelledby="videoModalLabel{{ advert.slug }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="videoModalLabel{{ advert.slug }}">{{ advert.title }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <iframe width="100%" height="315" src="https://www.youtube.com/embed/{{ advert.youtube_link|slice:"-11:" }}" frameborder="0" allowfullscreen></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                No video available
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{advert.views}}
+                        </td>
+                        {% if request.user.is_content_creator or request.user.is_superuser %}  <!-- Updated condition -->
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-ellipsis-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu position-fixed">
+                                    <li><a class="dropdown-item" href="{% url 'edit_advert' advert.slug %}"><i class="fas fa-edit"></i> Update</a></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'delete_advert' advert.slug %}"><i class="fas fa-trash-alt"></i> Delete</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">
+                            <span class="text-danger">No adverts found.</span>
+                            {% if request.user.is_content_creator or request.user.is_superuser %}
+                                <a href="{% url 'add_advert' %}">Add an advert now</a>.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="8">
+                        <span class="text-danger">No adverts linked to your bids are allocated so far.</span>
+                    </td>
+                </tr>
+                {% endif %}
+            {% else %}
+                {% for advert in page_obj %}
+                <tr>
+                    <td>{{ forloop.counter }}.</td>
+                    <td>
+                        <a class="a-list" href="{{ advert.get_absolute_url }}">
+                            {{ advert.title }}
+                        </a>
+                    </td>
+                    <td>{{ advert.category.title }}</td>
+                    <td>{{ advert.bid.title }}</td>
+                    <td>{{ advert.description|truncatewords:10 }}</td>
+                    <td>
+                        {% if advert.youtube_link %}
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#videoModal{{ advert.slug }}">
+                                <img src="https://img.youtube.com/vi/{{ advert.youtube_link|slice:"-11:" }}/hqdefault.jpg" alt="YouTube Thumbnail" style="width: 150px; height: 84px;">
+                            </a>
+                            <div class="modal fade" id="videoModal{{ advert.slug }}" tabindex="-1" aria-labelledby="videoModalLabel{{ advert.slug }}" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="videoModalLabel{{ advert.slug }}">{{ advert.title }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <iframe width="100%" height="315" src="https://www.youtube.com/embed/{{ advert.youtube_link|slice:"-11:" }}" frameborder="0" allowfullscreen></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            No video available
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{advert.views}}
+                    </td>
+                    {% if request.user.is_content_creator or request.user.is_superuser %}  <!-- Updated condition -->
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu position-fixed">
+                                <li><a class="dropdown-item" href="{% url 'edit_advert' advert.slug %}"><i class="fas fa-edit"></i> Update</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'delete_advert' advert.slug %}"><i class="fas fa-trash-alt"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">
+                        <span class="text-danger">No adverts found.</span>
+                        {% if request.user.is_content_creator or request.user.is_superuser %}
+                            <a href="{% url 'add_advert' %}">Add an advert now</a>.
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+{% endblock content %}

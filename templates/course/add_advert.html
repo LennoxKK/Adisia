@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | Adisia{% endblock title %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'advertiser_list' %}">Advertisers</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Add Advert</li>
+    </ol>
+</nav>
+
+<div class="title-1">Add Advert</div>
+<br><br>
+
+{% include 'snippets/messages.html' %}
+
+<form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <p class="form-title">Advert Details</p>
+                <div class="p-3">
+                    {{ form.title|as_crispy_field }}            <!-- Title field -->
+                    {{ form.description|as_crispy_field }}      <!-- Description field -->
+                    {{ form.youtube_link|as_crispy_field }}      <!-- YouTube link field -->
+                    {{ form.bid|as_crispy_field }}              <!-- Bid field --><!-- Category field -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <p class="form-title">Additional Information</p>
+                <div class="p-3">
+                    <!-- Any other fields or notes can be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <input class="btn btn-primary mt-3" type="submit" value="Save">
+</form>
+
+{% endblock content %}

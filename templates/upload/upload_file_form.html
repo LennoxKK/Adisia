@@ -7,14 +7,14 @@
 <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'programs' %}">Programs</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'program_detail' course.program.id %}">{{ course.program }}</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'course_detail' course.slug %}">{{ course }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'categories' %}">Categories</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'category_detail' bid.category.id %}">{{ bid.category }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'bid_detail' bid.slug %}">{{ bid }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">File upload</li>
     </ol>
 </nav>
     
-<p class="title-1">File upload for {{ course|truncatechars:25 }}</p>
+<p class="title-1">File upload for {{ bid|truncatechars:25 }}</p>
 <br><br>
 
 {% include 'snippets/messages.html' %}
@@ -30,7 +30,7 @@
                     
                     <div class="form-group">
                         <button class="btn btn-primary" type="submit">Upload</button>
-                        <a class="btn btn-danger" href="{% url 'course_detail' course.slug %}" style="float: right;">Cancel</a>
+                        <a class="btn btn-danger" href="{% url 'bid_detail' bid.slug %}" style="float: right;">Cancel</a>
                     </div>
             </form>
         </div>

@@ -1,9 +1,7 @@
 from itertools import chain
 from django.views.generic import ListView
-from core.models import NewsAndEvents
-from course.models import Program, Course
-from quiz.models import Quiz
-
+ # Assuming Adverts model exists in core.models
+from course.models import Bid,Advert # Assuming Bids model exists in course.models
 
 class SearchView(ListView):
     template_name = "search/search_view.html"
@@ -21,18 +19,12 @@ class SearchView(ListView):
         query = request.GET.get("q", None)
 
         if query is not None:
-            news_events_results = NewsAndEvents.objects.search(query)
-            program_results = Program.objects.search(query)
-            course_results = Course.objects.search(query)
-            quiz_results = Quiz.objects.search(query)
+            advert_results = Adverts.objects.search(query)  # Assuming a search method exists
+            bid_results = Bids.objects.search(query)  # Assuming a search method exists
 
-            # combine querysets
-            queryset_chain = chain(
-                news_events_results, program_results, course_results, quiz_results
-            )
-            queryset = sorted(
-                queryset_chain, key=lambda instance: instance.pk, reverse=True
-            )
-            self.count = len(queryset)  # since queryset is actually a list
+            # Combine querysets
+            queryset_chain = chain(advert_results, bid_results)
+            queryset = sorted(queryset_chain, key=lambda instance: instance.pk, reverse=True)
+            self.count = len(queryset)  # Since queryset is actually a list
             return queryset
-        return NewsAndEvents.objects.none()  # just an empty queryset as default
+        return Adverts.objects.none()  # Just an empty queryset as default

@@ -9,7 +9,7 @@
 <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Course Registration</li>
+        <li class="breadcrumb-item active" aria-current="page">Bid Registration</li>
     </ol>
 </nav>
 
@@ -62,13 +62,7 @@
                                 </th>
                                 <td>{{ course.code }}</td>
                                 <td>{{ course.title }}</td>
-                                <td>{{ course.credit }}</td>
-                                <td>{{ course.year }}</td>
-                                {% if course.is_elective %}
-                                <td>Elective</td>
-                                {% else %}
-                                <td>Core</td>
-                                {% endif %}
+                                
                                 <th>-</th>
                             </tr>
                             {% endif %}
@@ -125,13 +119,7 @@
                                 </th>
                                 <td>{{ course.code }}</td>
                                 <td>{{ course.title }}</td>
-                                <td>{{ course.credit }}</td>
-                                <td>{{ course.year }}</td>
-                                {% if course.is_elective %}
-                                <td>Elective</td>
-                                {% else %}
-                                <td>Core</td>
-                                {% endif %}
+               
                                 <th>-</th>
                             </tr>
                             {% endif %}
@@ -229,13 +217,7 @@
                                 </th>
                                 <td>{{ course.code }}</td>
                                 <td>{{ course.title }}</td>
-                                <td>{{ course.credit }}</td>
-                                <td>{{ course.year }}</td>
-                                {% if course.is_elective %}
-                                <td>Elective</td>
-                                {% else %}
-                                <td>Core</td>
-                                {% endif %}
+                              
                                 <th>-</th>
                             </tr>
                             {% empty %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load custom_filters %}  <!-- Load your custom filters here -->
+{% block title %}{{ advert.title }} | Adisia{% endblock title %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'workspace_rank' %}">Adverts</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ advert.title }}</li>
+    </ol>
+</nav>
+
+<div class="title-1"><i class="fas fa-bullhorn"></i> Advert Details</div>
+<br><br>
+
+<div class="advert-detail-card bg-light p-4 rounded">
+    <h3>{{ advert.title }}</h3>
+    
+    <div class="mt-3">
+        <strong>Description:</strong> {{ advert.description }}
+    </div>
+    
+    <div class="mt-3">
+        <strong>Category:</strong> {{ advert.category.title }}
+    </div>
+    
+    <div class="mt-3">
+        <strong>Content Creator:</strong> {{ advert.creator.get_full_name }}
+    </div>
+
+    <div class="mt-3">
+        <strong>YouTube Video:</strong>
+        {% if advert.youtube_link %}
+            <a href="#" data-bs-toggle="modal" data-bs-target="#videoModal{{ advert.slug }}">
+                <img src="https://img.youtube.com/vi/{{ advert.youtube_link|slice:"-11:" }}/hqdefault.jpg" alt="YouTube Thumbnail" style="width: 300px; height: 169px;">
+            </a>
+            <div class="modal fade" id="videoModal{{ advert.slug }}" tabindex="-1" aria-labelledby="videoModalLabel{{ advert.slug }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="videoModalLabel{{ advert.slug }}">{{ advert.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <iframe width="100%" height="500" src="https://www.youtube.com/embed/{{ advert.youtube_link|slice:"-11:" }}" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p>No video available</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-3">
+        <strong>Statistics:</strong>
+        <p>Views: {{ advert.views }}</p>
+        <p>Likes: {{ advert.likes }}</p>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{% url 'workspace_rank' %}" class="btn btn-secondary">Back to Adverts List</a>
+        <!-- Removed "Apply for This Advert" link -->
+    </div>
+</div>
+
+{% endblock content %}

@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <title>{% block title %}DjangoSMS{% endblock title %}</title>
+    <title>{% block title %}Adisia{% endblock title %}</title>
 
-    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static 'img/adisia_.png' %}" type="image/x-icon">
 
     <!-- Fontawesome icons -->
     <link rel="stylesheet" type="text/css" href="{% static 'vendor/fontawesome-6.5.1/css/all.min.css' %}">
@@ -19,11 +19,80 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.min.css' %}">
 
-    <!-- <script src="https://js.stripe.com/v3/"></script> -->
+    <!-- Dotted background effect CSS -->
+    <style>
+        .dotted-background {
+            background-color: #f8f9fa;
+            background-image: radial-gradient(#dee2e6 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        .connect-animation {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            margin-top: 100px;
+        }
+
+        .connect-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #6f42c1;
+            position: absolute;
+            top: 50%;
+            left: 30%;
+            transform: translate(-50%, -50%);
+            animation: move-right 3s infinite ease-in-out;
+        }
+
+        .connect-circle.content-creator {
+            background-color: #007bff;
+            left: 70%;
+            animation: move-left 3s infinite ease-in-out;
+        }
+
+        @keyframes move-right {
+            0%, 100% {
+                transform: translate(0, -50%);
+            }
+            50% {
+                transform: translate(80px, -50%);
+            }
+        }
+
+        @keyframes move-left {
+            0%, 100% {
+                transform: translate(0, -50%);
+            }
+            50% {
+                transform: translate(-80px, -50%);
+            }
+        }
+
+        .connect-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #343a40;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .center {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+    </style>
+
     {% block header %}{% endblock %}
 </head>
 
-<body>
+<body class="dotted-background">
     {% block sidebar %}
         {% include 'aside.html' %}
     {% endblock %}
@@ -35,7 +104,20 @@
         {% endblock %}
 
         <div class="container-fluid" id="main-content">
-            {% block content %}{% endblock content %}
+            {% block content %}
+            {% if bids %}
+                <!-- Existing content displaying bids -->
+            {% else %}
+                <!-- Animation when no bids are available -->
+                <div class="center">
+                    <div class="connect-animation">
+                        <div class="connect-circle advertiser"></div>
+                        <div class="connect-circle content-creator"></div>
+                    </div>
+                    <div class="connect-text">Advertisers and Content Creators are Connecting...</div>
+                </div>
+            {% endif %}
+            {% endblock content %}
         </div>
 
     </div>

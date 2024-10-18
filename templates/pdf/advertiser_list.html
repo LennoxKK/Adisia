@@ -1,0 +1,83 @@
+{% block content %}
+<style>
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table th, .table td {
+    padding: 8px;
+    border: 1px solid #ddd; /* Add thin borders for separation */
+    text-align: left;
+  }
+
+  .table th {
+    background-color: #f2f2f2;
+  }
+
+  .title-1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  .text-danger {
+    color: red;
+  }
+
+  a {
+    color: black;
+    text-decoration: none;
+  }
+</style>
+
+<p class="title-1">Advertisers</p>
+
+<div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>ID No.</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Mob No.</th>
+        <th>Address/City</th>
+        {% if request.user.is_superuser %}
+        <th>Action</th> <!-- Action column for superuser actions -->
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for advertiser in advertisers %}
+      <tr>
+        <td>{{ forloop.counter }}.</td>
+        <td>{{ advertiser.username }}</td>
+        <td><a href="{% url 'profile_single' advertiser.id %}">{{ advertiser.get_full_name }}</a></td>
+        <td>{{ advertiser.email }}</td>
+        <td>{{ advertiser.phone }}</td>
+        <td>{{ advertiser.address }}</td>
+        {% if request.user.is_superuser %}
+        <td>
+          <div class="dropdown">
+            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-ellipsis-vertical"></i>
+            </button>
+            <ul class="dropdown-menu position-fixed">
+              <li><a class="dropdown-item" href="{% url 'advertiser_edit' pk=advertiser.pk %}"><i class="fas fa-edit"></i> Update</a></li>
+              <li><a class="dropdown-item text-danger" href="{% url 'advertiser_delete' pk=advertiser.pk %}"><i class="fas fa-trash-alt"></i> Delete</a></li>
+            </ul>
+          </div>
+        </td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6">
+          <span class="text-danger">No Advertiser(s) found.</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock content %}

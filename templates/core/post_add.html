@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }} | Learning management system{% endblock title %}
+{% block title %}{{ title }} | Adisia {% endblock title %}
 {% load crispy_forms_tags %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/">Home</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Post form</li>
+      <li class="breadcrumb-item active" aria-current="page">Pools form</li>
     </ol>
 </nav>
 
@@ -17,7 +17,7 @@
 <div class="row">
     <div class="col-md-6 mx-auto">
         <div class="card">
-            <p class="form-title">Post Form</p>
+            <p class="form-title">Pools Form</p>
             <div class="card-body">
                 <form action="" method="POST">{% csrf_token %}
                     {{ form|crispy }}

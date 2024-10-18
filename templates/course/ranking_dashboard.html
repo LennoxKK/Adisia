@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load custom_filters %}  <!-- Load your custom filters here -->
+{% block title %}Ranked Adverts | Adverts Management System{% endblock title %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Ranked Adverts</li>
+    </ol>
+</nav>
+
+<div class="title-1"><i class="fas fa-bullhorn"></i> Ranked Advert List</div>
+<br><br>
+
+{% include 'snippets/messages.html' %}
+
+<div class="table-responsive table-shadow table-light table-striped m-0 mt-4">
+    <table class="table table-light">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Content Creator</th>
+                <th>Top Video Title</th>
+                <th>Category</th>
+                <th>Bid</th>
+                <th>Description</th>
+                <th>YouTube Video</th>
+                <th>Total Views & Likes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for creator in ranked_creators %}
+           
+            <tr {% if creator.name == request.user.first_name|add:" "|add:user.last_name %} class="highlighted"{% endif %}>
+                <td>{{ forloop.counter }}.</td>
+                <td>{{ creator.name }}</td>
+                <td>
+                    <a class="a-list" href="{{ creator.get_absolute_url }}">
+                        {{ creator.title }}
+                    </a>
+                </td>
+                <td>{{ creator.category }}</td>
+                <td>{{ creator.bid }}</td>
+                <td>
+                    <i class="fas fa-eye description-eye" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#descModal{{ creator.slug }}" aria-expanded="false"></i>
+                </td>
+                <td>
+                    {% if creator.youtube_link %}
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#videoModal{{ creator.slug }}">
+                            <img src="https://img.youtube.com/vi/{{ creator.youtube_link|slice:"-11:" }}/hqdefault.jpg" alt="YouTube Thumbnail" style="width: 150px; height: 84px;">
+                        </a>
+                        <div class="modal fade" id="videoModal{{ creator.slug }}" tabindex="-1" aria-labelledby="videoModalLabel{{ creator.slug }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="videoModalLabel{{ creator.slug }}">{{ creator.title }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <iframe width="100%" height="315" src="https://www.youtube.com/embed/{{ creator.youtube_link|slice:"-11:" }}" frameborder="0" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        No video available
+                    {% endif %}
+                </td>
+                <td class="views-likes" data-views="{{ creator.views }}" data-likes="{{ creator.likes }}">
+                    <!-- These values will be dynamically updated with JS -->
+                    {{ creator.views }} views <br> {{ creator.likes }} likes
+                </td>
+            </tr>
+
+            <!-- Description Modal -->
+            <div class="modal fade modal-origin" id="descModal{{ creator.slug }}" tabindex="-1" aria-labelledby="descModalLabel{{ creator.slug }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="descModalLabel{{ creator.slug }}">{{ creator.title }} - Description</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {{ creator.description }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <tr>
+                <td colspan="8">
+                    <span class="text-danger">No ranked adverts found.</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if ranked_creators %}
+<div class="pagination">
+    <span class="step-links">
+        <!-- Pagination for ranked adverts can be added if required -->
+    </span>
+</div>
+{% endif %}
+
+<script>
+    // Function to format numbers to 'k' and 'M'
+    function formatNumber(num) {
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';  // Millions
+        }
+        if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'k';  // Thousands
+        }
+        return num;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format views and likes using JavaScript
+        document.querySelectorAll('.views-likes').forEach(function(element) {
+            const views = parseInt(element.dataset.views);
+            const likes = parseInt(element.dataset.likes);
+            element.innerHTML = `${formatNumber(views)} views <br> ${formatNumber(likes)} likes`;
+        });
+
+        var descriptionIcons = document.querySelectorAll('.description-eye');
+
+        descriptionIcons.forEach(function(icon) {
+            icon.addEventListener('click', function() {
+                var modalId = icon.getAttribute('data-bs-target');
+                var modal = document.querySelector(modalId);
+                var iconRect = icon.getBoundingClientRect();
+
+                // Set the transform-origin of the modal to the position of the eye icon
+                var top = iconRect.top + window.scrollY;
+                var left = iconRect.left + window.scrollX;
+                modal.querySelector('.modal-dialog').style.transformOrigin = `${left}px ${top}px`;
+            });
+        });
+    });
+</script>
+
+{% endblock content %}

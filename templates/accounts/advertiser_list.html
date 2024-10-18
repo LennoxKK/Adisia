@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | Adisia{% endblock title %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Advertisers</li>
+    </ol>
+</nav>
+
+{% if request.user.is_superuser %}
+<div class="manage-wrap">
+  
+    <a class="btn btn-primary" target="_blank" href="{% url 'advertiser_list_pdf' %}"><i class="fas fa-download"></i> Download PDF</a>
+</div>
+{% endif %}
+
+<p class="title-1"><i class="fas fa-chalkboard-teacher"></i>Advertisers</p>
+
+{% include 'snippets/messages.html' %}
+{% include 'snippets/filter_form.html' %}
+
+<div class="table-responsive table-shadow table-light table-striped m-0 mt-4">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>ID No.</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Address/City</th>
+                <th>Last Login</th>
+                {% if request.user.is_superuser %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for advertiser in filter.qs %}
+            <tr>
+                <td>{{ forloop.counter }}.</td>
+                <td>{{ advertiser.username }}</td>
+                <td><a href="{% url 'profile_single' advertiser.id %}">{{ advertiser.get_full_name }}</a></td>
+                <td>{{ advertiser.email }}</td>
+                <td>{{ advertiser.address }}</td>
+                <td>{{ advertiser.last_login }}</td>
+                {% if request.user.is_superuser %}
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-ellipsis-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu position-fixed">
+                          <li><a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Update</a></li>
+                          <li><a class="dropdown-item" target="_blank" href="{% url 'profile_single' advertiser.id %}?download_pdf=1"><i class="fas fa-download"></i> Download PDF</a></li>
+                          <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash-alt"></i> Delete</a></li>
+                        </ul>
+                    </div>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    <span class="text-danger">
+                        No Advertisers found.
+                  
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

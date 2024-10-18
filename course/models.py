@@ -5,287 +5,248 @@ from django.core.validators import FileExtensionValidator
 from django.db.models.signals import pre_save, post_save, post_delete
 from django.db.models import Q
 from django.dispatch import receiver
-
-# project import
-from .utils import *
+from .utils import unique_slug_generator
 from core.models import ActivityLog
+import string
+import random
+from django.utils import timezone
 
-YEARS = (
-    (1, "1"),
-    (2, "2"),
-    (3, "3"),
-    (4, "4"),
-    (4, "5"),
-    (4, "6"),
-)
-
-# LEVEL_COURSE = "Level course"
-BACHELOR_DEGREE = "Bachelor"
-MASTER_DEGREE = "Master"
-
-LEVEL = (
-    # (LEVEL_COURSE, "Level course"),
-    (BACHELOR_DEGREE, "Bachelor Degree"),
-    (MASTER_DEGREE, "Master Degree"),
-)
-
-FIRST = "First"
-SECOND = "Second"
-THIRD = "Third"
-
-SEMESTER = (
-    (FIRST, "First"),
-    (SECOND, "Second"),
-    (THIRD, "Third"),
-)
-
-
-class ProgramManager(models.Manager):
+# Category Manager for searching categories
+class CategoryManager(models.Manager):
     def search(self, query=None):
         queryset = self.get_queryset()
         if query is not None:
             or_lookup = Q(title__icontains=query) | Q(summary__icontains=query)
-            queryset = queryset.filter(
-                or_lookup
-            ).distinct()  # distinct() is often necessary with Q lookups
+            queryset = queryset.filter(or_lookup).distinct()
         return queryset
 
-
-class Program(models.Model):
+# Category Model
+class Category(models.Model):
     title = models.CharField(max_length=150, unique=True)
     summary = models.TextField(null=True, blank=True)
+    updated_date = models.DateTimeField(auto_now=True, null=True)
 
-    objects = ProgramManager()
+    objects = CategoryManager()
 
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
-        return reverse("program_detail", kwargs={"pk": self.pk})
+        return reverse("category_detail", kwargs={"pk": self.pk})
 
-
-@receiver(post_save, sender=Program)
+@receiver(post_save, sender=Category)
 def log_save(sender, instance, created, **kwargs):
     verb = "created" if created else "updated"
-    ActivityLog.objects.create(message=f"The program '{instance}' has been {verb}.")
+    ActivityLog.objects.create(message=f"The category '{instance}' has been {verb}.")
 
-
-@receiver(post_delete, sender=Program)
+@receiver(post_delete, sender=Category)
 def log_delete(sender, instance, **kwargs):
-    ActivityLog.objects.create(message=f"The program '{instance}' has been deleted.")
+    ActivityLog.objects.create(message=f"The category '{instance}' has been deleted.")
 
-
-class CourseManager(models.Manager):
+# Bid Manager for searching bids
+class BidManager(models.Manager):
     def search(self, query=None):
         queryset = self.get_queryset()
         if query is not None:
             or_lookup = (
-                Q(title__icontains=query)
-                | Q(summary__icontains=query)
-                | Q(code__icontains=query)
-                | Q(slug__icontains=query)
+                Q(title__icontains=query) |
+                Q(summary__icontains=query) |
+                Q(code__icontains=query) |
+                Q(slug__icontains=query)
             )
-            queryset = queryset.filter(
-                or_lookup
-            ).distinct()  # distinct() is often necessary with Q lookups
+            queryset = queryset.filter(or_lookup).distinct()
         return queryset
 
-
-class Course(models.Model):
+# Bid Model
+class Bid(models.Model):
     slug = models.SlugField(blank=True, unique=True)
     title = models.CharField(max_length=200, null=True)
-    code = models.CharField(max_length=200, unique=True, null=True)
-    credit = models.IntegerField(null=True, default=0)
+    code = models.CharField(max_length=10, unique=True, blank=True, editable=False)
     summary = models.TextField(max_length=200, blank=True, null=True)
-    program = models.ForeignKey(Program, on_delete=models.CASCADE)
-    level = models.CharField(max_length=25, choices=LEVEL, null=True)
-    year = models.IntegerField(choices=YEARS, default=0)
-    semester = models.CharField(choices=SEMESTER, max_length=200)
-    is_elective = models.BooleanField(default=False, blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_bids', null=True, blank=True)
+    updated_date = models.DateTimeField(auto_now=True, null=True)
+    deadline = models.DateTimeField(null=True, blank=True)
 
-    objects = CourseManager()
+    objects = BidManager()
 
     def __str__(self):
         return "{0} ({1})".format(self.title, self.code)
 
     def get_absolute_url(self):
-        return reverse("course_detail", kwargs={"slug": self.slug})
+        return reverse("bid_detail", kwargs={"slug": self.slug})
 
-    @property
-    def is_current_semester(self):
-        from core.models import Semester
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.code = self.generate_code()
+        if not self.slug:
+            self.slug = unique_slug_generator(self)
+        super().save(*args, **kwargs)
 
-        current_semester = Semester.objects.get(is_current_semester=True)
+    def generate_code(self):
+        length = 6
+        characters = string.ascii_uppercase + string.digits
+        random_code = ''.join(random.choice(characters) for _ in range(length))
+        return f"BID{random_code}"
 
-        if self.semester == current_semester.semester:
-            return True
-        else:
-            return False
-
-
-def course_pre_save_receiver(sender, instance, *args, **kwargs):
-    if not instance.slug:
-        instance.slug = unique_slug_generator(instance)
-
-
-pre_save.connect(course_pre_save_receiver, sender=Course)
-
-
-@receiver(post_save, sender=Course)
+@receiver(post_save, sender=Bid)
 def log_save(sender, instance, created, **kwargs):
     verb = "created" if created else "updated"
-    ActivityLog.objects.create(message=f"The course '{instance}' has been {verb}.")
+    ActivityLog.objects.create(message=f"The bid '{instance}' has been {verb}.")
 
-
-@receiver(post_delete, sender=Course)
+@receiver(post_delete, sender=Bid)
 def log_delete(sender, instance, **kwargs):
-    ActivityLog.objects.create(message=f"The course '{instance}' has been deleted.")
+    ActivityLog.objects.create(message=f"The bid '{instance}' has been deleted.")
 
-
-class CourseAllocation(models.Model):
-    lecturer = models.ForeignKey(
+# Bid Application Model
+class BidApplication(models.Model):
+    applicants = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="allocated_lecturer",
+        related_name="applications",
+        blank=True
     )
-    courses = models.ManyToManyField(Course, related_name="allocated_course")
-    session = models.ForeignKey(
-        "core.Session", on_delete=models.CASCADE, blank=True, null=True
-    )
+    bid = models.ForeignKey(Bid, on_delete=models.CASCADE, related_name="applied_bid", null=True)
 
     def __str__(self):
-        return self.lecturer.get_full_name
+        return str(self.bid)
+
+# Bid Allocation Model
+class BidAllocation(models.Model):
+    bid = models.ForeignKey(Bid, on_delete=models.CASCADE, related_name="allocations")
+    content_creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='allocated_bids')
+    application = models.ForeignKey(BidApplication, on_delete=models.CASCADE, related_name="allocations", null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[('allocated', 'Allocated'), ('completed', 'Completed'), ('canceled', 'Canceled')], default='allocated')
+    allocated_date = models.DateTimeField(auto_now_add=True)
+    completion_date = models.DateTimeField(null=True, blank=True)
+    feedback = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.bid.title} allocated to {self.content_creator.username}"
+    def is_overdue(self):
+        return self.completion_date < timezone.now()
+
+@receiver(post_save, sender=BidAllocation)
+def log_save(sender, instance, created, **kwargs):
+    verb = "allocated" if created else "updated"
+    ActivityLog.objects.create(message=f"The bid '{instance.bid.title}' has been {verb} to '{instance.content_creator.username}'.")
+
+@receiver(post_delete, sender=BidAllocation)
+def log_delete(sender, instance, **kwargs):
+    ActivityLog.objects.create(message=f"The allocation of the bid '{instance.bid.title}' to '{instance.content_creator.username}' has been deleted.")
+
+# Advert Model
+class Advert(models.Model):
+    title = models.CharField(max_length=200, null=False)
+    description = models.TextField(null=True, blank=True)
+    youtube_link = models.URLField(max_length=200, null=True, blank=True)
+    bid = models.OneToOneField(Bid, on_delete=models.CASCADE, related_name="advert")
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='adverts')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    slug = models.SlugField(blank=True, unique=True)
+    views = models.IntegerField(default=0)
+    likes = models.IntegerField(default=0)
+    timestamp = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self):
+        return self.title
 
     def get_absolute_url(self):
-        return reverse("edit_allocated_course", kwargs={"pk": self.pk})
+        return reverse("advert_detail", kwargs={"slug": self.slug})
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug_generator(self)
+        super().save(*args, **kwargs)
 
+@receiver(post_save, sender=Advert)
+def log_save(sender, instance, created, **kwargs):
+    verb = "created" if created else "updated"
+    ActivityLog.objects.create(message=f"The advert '{instance.title}' has been {verb}.")
+
+@receiver(post_delete, sender=Advert)
+def log_delete(sender, instance, **kwargs):
+    ActivityLog.objects.create(message=f"The advert '{instance.title}' has been deleted.")
+
+# Upload Model for documents related to bids
 class Upload(models.Model):
     title = models.CharField(max_length=100)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    bid = models.ForeignKey(Bid, on_delete=models.CASCADE)
     file = models.FileField(
-        upload_to="course_files/",
+        upload_to="bid_files/",
         help_text="Valid Files: pdf, docx, doc, xls, xlsx, ppt, pptx, zip, rar, 7zip",
-        validators=[
-            FileExtensionValidator(
-                [
-                    "pdf",
-                    "docx",
-                    "doc",
-                    "xls",
-                    "xlsx",
-                    "ppt",
-                    "pptx",
-                    "zip",
-                    "rar",
-                    "7zip",
-                ]
-            )
-        ],
+        validators=[FileExtensionValidator(
+            [
+                "pdf",
+                "docx",
+                "doc",
+                "xls",
+                "xlsx",
+                "ppt",
+                "pptx",
+                "zip",
+                "rar",
+                "7zip",
+            ]
+        )],
     )
-    updated_date = models.DateTimeField(auto_now=True, auto_now_add=False, null=True)
-    upload_time = models.DateTimeField(auto_now=False, auto_now_add=True, null=True)
+    updated_date = models.DateTimeField(auto_now=True, null=True)
+    upload_time = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return str(self.file)[6:]
-
-    def get_extension_short(self):
-        ext = str(self.file).split(".")
-        ext = ext[len(ext) - 1]
-
-        if ext in ("doc", "docx"):
-            return "word"
-        elif ext == "pdf":
-            return "pdf"
-        elif ext in ("xls", "xlsx"):
-            return "excel"
-        elif ext in ("ppt", "pptx"):
-            return "powerpoint"
-        elif ext in ("zip", "rar", "7zip"):
-            return "archive"
 
     def delete(self, *args, **kwargs):
         self.file.delete()
         super().delete(*args, **kwargs)
 
-
 @receiver(post_save, sender=Upload)
 def log_save(sender, instance, created, **kwargs):
     if created:
         ActivityLog.objects.create(
-            message=f"The file '{instance.title}' has been uploaded to the course '{instance.course}'."
+            message=f"The file '{instance.title}' has been uploaded to the bid '{instance.bid}'."
         )
     else:
         ActivityLog.objects.create(
-            message=f"The file '{instance.title}' of the course '{instance.course}' has been updated."
+            message=f"The file '{instance.title}' of the bid '{instance.bid}' has been updated."
         )
-
 
 @receiver(post_delete, sender=Upload)
 def log_delete(sender, instance, **kwargs):
     ActivityLog.objects.create(
-        message=f"The file '{instance.title}' of the course '{instance.course}' has been deleted."
+        message=f"The file '{instance.title}' of the bid '{instance.bid}' has been deleted."
     )
 
-
+# Upload Video Model for video uploads related to bids
 class UploadVideo(models.Model):
     title = models.CharField(max_length=100)
     slug = models.SlugField(blank=True, unique=True)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    bid = models.ForeignKey(Bid, on_delete=models.CASCADE)
     video = models.FileField(
-        upload_to="course_videos/",
+        upload_to="bid_videos/",
         help_text="Valid video formats: mp4, mkv, wmv, 3gp, f4v, avi, mp3",
-        validators=[
-            FileExtensionValidator(["mp4", "mkv", "wmv", "3gp", "f4v", "avi", "mp3"])
-        ],
+        validators=[FileExtensionValidator(["mp4", "mkv", "wmv", "3gp", "f4v", "avi", "mp3"])]
     )
     summary = models.TextField(null=True, blank=True)
-    timestamp = models.DateTimeField(auto_now=False, auto_now_add=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return str(self.title)
 
     def get_absolute_url(self):
         return reverse(
-            "video_single", kwargs={"slug": self.course.slug, "video_slug": self.slug}
+            "video_single", kwargs={"slug": self.bid.slug, "video_slug": self.slug}
         )
 
-    def delete(self, *args, **kwargs):
-        self.video.delete()
-        super().delete(*args, **kwargs)
-
-
-def video_pre_save_receiver(sender, instance, *args, **kwargs):
-    if not instance.slug:
-        instance.slug = unique_slug_generator(instance)
-
-
-pre_save.connect(video_pre_save_receiver, sender=UploadVideo)
-
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug_generator(self)
+        super().save(*args, **kwargs)
 
 @receiver(post_save, sender=UploadVideo)
 def log_save(sender, instance, created, **kwargs):
-    if created:
-        ActivityLog.objects.create(
-            message=f"The video '{instance.title}' has been uploaded to the course {instance.course}."
-        )
-    else:
-        ActivityLog.objects.create(
-            message=f"The video '{instance.title}' of the course '{instance.course}' has been updated."
-        )
-
+    verb = "created" if created else "updated"
+    ActivityLog.objects.create(message=f"The video '{instance.title}' has been {verb}.")
 
 @receiver(post_delete, sender=UploadVideo)
 def log_delete(sender, instance, **kwargs):
-    ActivityLog.objects.create(
-        message=f"The video '{instance.title}' of the course '{instance.course}' has been deleted."
-    )
-
-
-class CourseOffer(models.Model):
-    """NOTE: Only department head can offer semester courses"""
-
-    dep_head = models.ForeignKey("accounts.DepartmentHead", on_delete=models.CASCADE)
-
-    def __str__(self):
-        return "{}".format(self.dep_head)
+    ActivityLog.objects.create(message=f"The video '{instance.title}' has been deleted.")

@@ -1,0 +1,1366 @@
+openapi: 3.0.3
+info:
+  title: My Project API
+  version: 1.0.0
+  description: API documentation for My Project
+paths:
+  /accounts/api/login/:
+    post:
+      operationId: accounts_api_login_create
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLogin'
+          description: ''
+  /accounts/api/logout/:
+    post:
+      operationId: accounts_api_logout_create
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/register/staff/:
+    post:
+      operationId: accounts_api_register_staff_create
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StaffRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StaffRegistration'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffRegistration'
+          description: ''
+  /accounts/api/register/student/:
+    post:
+      operationId: accounts_api_register_student_create
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StudentRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StudentRegistration'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentRegistration'
+          description: ''
+  /accounts/api/users/:
+    get:
+      operationId: accounts_api_users_list
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserList'
+          description: ''
+  /bids/api/bid-applications/:
+    get:
+      operationId: bids_api_bid_applications_list
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BidApplication'
+          description: ''
+    post:
+      operationId: bids_api_bid_applications_create
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BidApplication'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BidApplication'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BidApplication'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BidApplication'
+          description: ''
+  /bids/api/bid-applications/{id}/:
+    get:
+      operationId: bids_api_bid_applications_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this bid application.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BidApplication'
+          description: ''
+    put:
+      operationId: bids_api_bid_applications_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this bid application.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BidApplication'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BidApplication'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BidApplication'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BidApplication'
+          description: ''
+    patch:
+      operationId: bids_api_bid_applications_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this bid application.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBidApplication'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBidApplication'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBidApplication'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BidApplication'
+          description: ''
+    delete:
+      operationId: bids_api_bid_applications_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this bid application.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /bids/api/course-allocations/:
+    get:
+      operationId: bids_api_course_allocations_list
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseAllocation'
+          description: ''
+    post:
+      operationId: bids_api_course_allocations_create
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseAllocation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseAllocation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseAllocation'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseAllocation'
+          description: ''
+  /bids/api/course-allocations/{id}/:
+    get:
+      operationId: bids_api_course_allocations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course allocation.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseAllocation'
+          description: ''
+    put:
+      operationId: bids_api_course_allocations_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course allocation.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseAllocation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseAllocation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseAllocation'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseAllocation'
+          description: ''
+    patch:
+      operationId: bids_api_course_allocations_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course allocation.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseAllocation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseAllocation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseAllocation'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseAllocation'
+          description: ''
+    delete:
+      operationId: bids_api_course_allocations_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course allocation.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /bids/api/course-offers/:
+    get:
+      operationId: bids_api_course_offers_list
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseOffer'
+          description: ''
+    post:
+      operationId: bids_api_course_offers_create
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseOffer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseOffer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseOffer'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseOffer'
+          description: ''
+  /bids/api/course-offers/{id}/:
+    get:
+      operationId: bids_api_course_offers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course offer.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseOffer'
+          description: ''
+    put:
+      operationId: bids_api_course_offers_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course offer.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseOffer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseOffer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseOffer'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseOffer'
+          description: ''
+    patch:
+      operationId: bids_api_course_offers_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course offer.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseOffer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseOffer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseOffer'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseOffer'
+          description: ''
+    delete:
+      operationId: bids_api_course_offers_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course offer.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /bids/api/courses/:
+    get:
+      operationId: bids_api_courses_list
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+          description: ''
+    post:
+      operationId: bids_api_courses_create
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Course'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Course'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+  /bids/api/courses/{id}/:
+    get:
+      operationId: bids_api_courses_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+    put:
+      operationId: bids_api_courses_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Course'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Course'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+    patch:
+      operationId: bids_api_courses_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCourse'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCourse'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCourse'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+    delete:
+      operationId: bids_api_courses_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this course.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /bids/api/upload-videos/:
+    get:
+      operationId: bids_api_upload_videos_list
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UploadVideo'
+          description: ''
+    post:
+      operationId: bids_api_upload_videos_create
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadVideo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UploadVideo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadVideo'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadVideo'
+          description: ''
+  /bids/api/upload-videos/{id}/:
+    get:
+      operationId: bids_api_upload_videos_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload video.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadVideo'
+          description: ''
+    put:
+      operationId: bids_api_upload_videos_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload video.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadVideo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UploadVideo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadVideo'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadVideo'
+          description: ''
+    patch:
+      operationId: bids_api_upload_videos_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload video.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadVideo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadVideo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadVideo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadVideo'
+          description: ''
+    delete:
+      operationId: bids_api_upload_videos_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload video.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /bids/api/uploads/:
+    get:
+      operationId: bids_api_uploads_list
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Upload'
+          description: ''
+    post:
+      operationId: bids_api_uploads_create
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Upload'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Upload'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Upload'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+  /bids/api/uploads/{id}/:
+    get:
+      operationId: bids_api_uploads_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+    put:
+      operationId: bids_api_uploads_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Upload'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Upload'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Upload'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+    patch:
+      operationId: bids_api_uploads_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - bids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpload'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpload'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpload'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+    delete:
+      operationId: bids_api_uploads_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - bids
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    BidApplication:
+      type: object
+      properties:
+        applicants:
+          type: array
+          items:
+            type: integer
+        course:
+          type: integer
+          nullable: true
+    BlankEnum:
+      enum:
+      - ''
+    Course:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          nullable: true
+          maxLength: 200
+        code:
+          type: string
+          readOnly: true
+        summary:
+          type: string
+          nullable: true
+          maxLength: 200
+        program:
+          type: integer
+        creator:
+          type: integer
+          nullable: true
+        updated_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        deadline:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - code
+      - program
+      - updated_date
+    CourseAllocation:
+      type: object
+      properties:
+        lecturer:
+          type: integer
+          nullable: true
+        course:
+          type: integer
+          nullable: true
+    CourseOffer:
+      type: object
+      properties:
+        dep_head:
+          type: integer
+      required:
+      - dep_head
+    GenderEnum:
+      enum:
+      - M
+      - F
+      type: string
+      description: |-
+        * `M` - Male
+        * `F` - Female
+    NullEnum:
+      enum:
+      - null
+    PatchedBidApplication:
+      type: object
+      properties:
+        applicants:
+          type: array
+          items:
+            type: integer
+        course:
+          type: integer
+          nullable: true
+    PatchedCourse:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          nullable: true
+          maxLength: 200
+        code:
+          type: string
+          readOnly: true
+        summary:
+          type: string
+          nullable: true
+          maxLength: 200
+        program:
+          type: integer
+        creator:
+          type: integer
+          nullable: true
+        updated_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        deadline:
+          type: string
+          format: date-time
+          nullable: true
+    PatchedCourseAllocation:
+      type: object
+      properties:
+        lecturer:
+          type: integer
+          nullable: true
+        course:
+          type: integer
+          nullable: true
+    PatchedCourseOffer:
+      type: object
+      properties:
+        dep_head:
+          type: integer
+    PatchedUpload:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        course:
+          type: integer
+        file:
+          type: string
+          format: uri
+          description: 'Valid Files: pdf, docx, doc, xls, xlsx, ppt, pptx, zip, rar,
+            7zip'
+          pattern: (?:pdf|docx|doc|xls|xlsx|ppt|pptx|zip|rar|7zip)$
+        updated_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        upload_time:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    PatchedUploadVideo:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        course:
+          type: integer
+        video:
+          type: string
+          format: uri
+          description: 'Valid video formats: mp4, mkv, wmv, 3gp, f4v, avi, mp3'
+          pattern: (?:mp4|mkv|wmv|3gp|f4v|avi|mp3)$
+        summary:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    StaffRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        phone:
+          type: string
+          nullable: true
+          maxLength: 60
+        address:
+          type: string
+          nullable: true
+          maxLength: 60
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        password1:
+          type: string
+          writeOnly: true
+        password2:
+          type: string
+          writeOnly: true
+      required:
+      - password1
+      - password2
+      - username
+    StudentRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        phone:
+          type: string
+          nullable: true
+          maxLength: 60
+        address:
+          type: string
+          nullable: true
+          maxLength: 60
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        password1:
+          type: string
+          writeOnly: true
+        password2:
+          type: string
+          writeOnly: true
+      required:
+      - password1
+      - password2
+      - username
+    Upload:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        course:
+          type: integer
+        file:
+          type: string
+          format: uri
+          description: 'Valid Files: pdf, docx, doc, xls, xlsx, ppt, pptx, zip, rar,
+            7zip'
+          pattern: (?:pdf|docx|doc|xls|xlsx|ppt|pptx|zip|rar|7zip)$
+        updated_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        upload_time:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - course
+      - file
+      - title
+      - updated_date
+      - upload_time
+    UploadVideo:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        course:
+          type: integer
+        video:
+          type: string
+          format: uri
+          description: 'Valid video formats: mp4, mkv, wmv, 3gp, f4v, avi, mp3'
+          pattern: (?:mp4|mkv|wmv|3gp|f4v|avi|mp3)$
+        summary:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - course
+      - timestamp
+      - title
+      - video
+    UserList:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        role:
+          type: string
+          readOnly: true
+      required:
+      - role
+      - username
+    UserLogin:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

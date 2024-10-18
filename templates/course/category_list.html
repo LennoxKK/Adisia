@@ -6,17 +6,17 @@
 <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Programs</li>
+        <li class="breadcrumb-item active" aria-current="page">Pools</li>
     </ol>
 </nav>
 
 {% if request.user.is_superuser %}
 <div class="manage-wrap">
-    <a class="btn btn-primary" href="{% url 'add_program' %}"><i class="fas fa-plus"></i>Add Program</a>
+    <a class="btn btn-primary" href="{% url 'add_category' %}"><i class="fas fa-plus"></i> Add Pool</a>
 </div>
 {% endif %}
 
-<div class="title-1"><i class="fas fa-book-open"></i>Program List</div>
+<div class="title-1"><i class="fas fa-book-open"></i> Pool List</div>
 <br><br>
 
 {% include 'snippets/messages.html' %}
@@ -28,7 +28,7 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Program Name</th>
+                    <th>Pool Name</th>
                     <th>Summary</th>
                     {% if request.user.is_superuser %}
                     <th>Action</th>
@@ -36,15 +36,15 @@
                 </tr>
             </thead>
             <tbody>
-                {% for program in filter.qs %}
+                {% for category in filter.qs %}
                 <tr>
                     <td>{{ forloop.counter }}.</td>
                     <td>
-                        <a class="a-list" href="{{ program.get_absolute_url }}">
-                            {{ program.title}}
+                        <a class="a-list" href="{{ category.get_absolute_url }}">
+                            {{ category.title }}
                         </a>
                     </td>
-                    <td>{{ program.summary }} </td>
+                    <td>{{ category.summary }} </td>
                     {% if request.user.is_superuser %}
                     <td>
                         <div class="dropdown">
@@ -52,8 +52,8 @@
                                 <i class="fa fa-ellipsis-vertical"></i>
                             </button>
                             <ul class="dropdown-menu position-fixed">
-                              <li><a class="dropdown-item" href="{% url 'edit_program' pk=program.pk %}"><i class="fas fa-edit"></i> Update</a></li>
-                              <li><a class="dropdown-item text-danger" href="{% url 'program_delete' pk=program.pk %}"><i class="fas fa-trash-alt"></i> Delete</a></li>
+                              <li><a class="dropdown-item" href="{% url 'edit_category' pk=category.pk %}"><i class="fas fa-edit"></i> Update</a></li>
+                              <li><a class="dropdown-item text-danger" href="{% url 'category_delete' pk=category.pk %}"><i class="fas fa-trash-alt"></i> Delete</a></li>
                             </ul>
                         </div>
                     </td>
@@ -61,23 +61,18 @@
                 </tr>
                 {% empty %}
                 <tr>
-                  <td></td>
-                  <td></td>
-                  <td>
+                  <td colspan="4">
                   <span class="text-danger">
-                    No program.
+                    No pool found.
                     {% if request.user.is_superuser %}
-                    <a href="{% url 'add_program' %}">
+                    <a href="{% url 'add_category' %}">
                     <i class="primary" style="font-size: 22px;">
-                       Add program now.
+                       Add Pool now.
                     </i>
                     {% endif %}
                     </a>
                   </span>
                 </td>
-                <td></td>
-                <td></td>
-                <td></td>
                 </tr>
                 {% endfor %}
             </tbody>

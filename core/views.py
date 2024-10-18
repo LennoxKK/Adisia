@@ -1,310 +1,186 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from accounts.decorators import advertiser_required, content_creator_required
+from accounts.models import User  # Assuming User is the only model here
+from course.models import Bid, Advert,BidApplication
+from course.forms import BidApplicationForm, AdvertForm
+from googleapiclient.discovery import build
+from django.http import JsonResponse
+from django.views import View
+from .youtube import youtuber_video_stats, extract_video_id  # Adjust import as necessary
+from django.utils import timezone
+# ########################################################
+# YouTube Video Stats for Adverts
+# ########################################################
 
-from accounts.decorators import admin_required, lecturer_required
-from accounts.models import User, Student
-from .forms import SessionForm, SemesterForm, NewsAndEventsForm
-from .models import NewsAndEvents, ActivityLog, Session, Semester
+# class YouTubeVideoStatsView(View):
+#     def get(self, request):
+#         form = YouTubeLinkForm()
+#         return render(request, 'youtube.html', {'form': form})
 
+#     def post(self, request):
+#         form = YouTubeLinkForm(request.POST)
+#         if form.is_valid():
+#             youtube_link = form.cleaned_data['youtube_link']
+#             video_id = extract_video_id(youtube_link)
+
+#             if not video_id:
+#                 return JsonResponse({'error': 'Invalid YouTube link'}, status=400)
+            
+#             stats = youtuber_video_stats(video_id)
+            
+#             if 'error' in stats:
+#                 return JsonResponse({'error': stats['error']['message']}, status=400)
+
+#             return JsonResponse(stats)
+        
+#         return render(request, "youtube.html", {'form': form})
 
 # ########################################################
-# News & Events
+# Home - View Bids (for Content Creators)
 # ########################################################
+
+
+
+
+
+
 @login_required
 def home_view(request):
-    items = NewsAndEvents.objects.all().order_by("-updated_date")
-    context = {
-        "title": "News & Events",
-        "items": items,
-    }
-    return render(request, "core/index.html", context)
+    """ Content Creators see available bids and Advertisers/Super Users see top 5 adverts """
+    
+    if request.user.is_content_creator:
+        # Content Creators: Show available bids whose deadline is yet to be reached
+        bids = Bid.objects.filter(deadline__gt=timezone.now()).order_by("-updated_date")
+        
+        # Get the applied bids for the current user
+        applied_bids = BidApplication.objects.filter(applicants=request.user).values_list('bid', flat=True)
+        
+        # Exclude bids that the user has already applied for
+        available_bids = bids.exclude(id__in=applied_bids)
 
+        return render(request, "core/index.html", {
+            "title": "Available Bids",
+            "bids": available_bids,
+        })
+
+    elif request.user.is_advertiser or request.user.is_superuser:
+        # Advertisers/Super Users: Show top 5 adverts
+        top_adverts = Advert.objects.all().order_by("-timestamp")[:5]
+
+        return render(request, "core/index.html", {
+            "title": "Top Advertisements",
+            "top_adverts": top_adverts,
+        })
+
+    # Optional: Redirect or show a not authorized message for other roles
+    return render(request, "core/not_authorized.html", {
+        "title": "Not Authorized",
+        "message": "You are not authorized to view this content."
+    })
+
+
+# ########################################################
+# Dashboard (for Advertisers to Track Adverts)
+# ########################################################
 
 @login_required
-@admin_required
+@advertiser_required
 def dashboard_view(request):
-    logs = ActivityLog.objects.all().order_by("-created_at")[:10]
-    gender_count = Student.get_gender_count()
-    context = {
-        "student_count": User.objects.get_student_count(),
-        "lecturer_count": User.objects.get_lecturer_count(),
-        "superuser_count": User.objects.get_superuser_count(),
-        "males_count": gender_count["M"],
-        "females_count": gender_count["F"],
-        "logs": logs,
-    }
-    return render(request, "core/dashboard.html", context)
+    """ Advertisers see the progress of their adverts (views and likes) """
+    adverts = Advert.objects.filter(advertiser=request.user).order_by("-updated_date")
+    return render(request, "core/dashboard.html", {
+        "title": "Advert Progress",
+        "adverts": adverts,
+    })
 
+# ########################################################
+# Bid Application (Content Creators)
+# ########################################################
 
 @login_required
-def post_add(request):
+@content_creator_required
+def apply_bid(request, bid_id):
+    """ Content Creators can apply for bids """
+    bid = get_object_or_404(Bid, id="bid-"+str(bid_id))
+    
     if request.method == "POST":
-        form = NewsAndEventsForm(request.POST)
-        title = request.POST.get("title")
+        form = BidApplicationForm(request.POST)
         if form.is_valid():
-            form.save()
-
-            messages.success(request, (title + " has been uploaded."))
+            application = form.save(commit=False)
+            application.content_creator = request.user
+            application.bid = bid
+            application.save()
+            messages.success(request, f"Successfully applied for {bid.title}.")
             return redirect("home")
         else:
-            messages.error(request, "Please correct the error(s) below.")
+            messages.error(request, "Error applying for the bid. Please correct the errors below.")
     else:
-        form = NewsAndEventsForm()
-    return render(
-        request,
-        "core/post_add.html",
-        {
-            "title": "Add Post",
-            "form": form,
-        },
-    )
+        form = BidApplicationForm()
 
+    return render(request, "core/apply_bid.html", {"form": form, "bid": bid})
+
+# ########################################################
+# Advert Management (Advertisers)
+# ########################################################
 
 @login_required
-@lecturer_required
-def edit_post(request, pk):
-    instance = get_object_or_404(NewsAndEvents, pk=pk)
+@advertiser_required
+def create_advert(request):
+    """ Advertisers can create new adverts """
     if request.method == "POST":
-        form = NewsAndEventsForm(request.POST, instance=instance)
-        title = request.POST.get("title")
+        form = AdvertForm(request.POST)
+        if form.is_valid():
+            advert = form.save(commit=False)
+            advert.advertiser = request.user
+            advert.save()
+            messages.success(request, "Advert created successfully.")
+            return redirect("dashboard")
+        else:
+            messages.error(request, "Error creating advert. Please correct the errors below.")
+    else:
+        form = AdvertForm()
+
+    return render(request, "core/create_advert.html", {"form": form})
+
+@login_required
+@advertiser_required
+def edit_advert(request, advert_id):
+    """ Advertisers can edit their adverts """
+    advert = get_object_or_404(Advert, id=advert_id)
+    
+    if request.method == "POST":
+        form = AdvertForm(request.POST, instance=advert)
         if form.is_valid():
             form.save()
-
-            messages.success(request, (title + " has been updated."))
-            return redirect("home")
+            messages.success(request, "Advert updated successfully.")
+            return redirect("dashboard")
         else:
-            messages.error(request, "Please correct the error(s) below.")
+            messages.error(request, "Error updating advert. Please correct the errors below.")
     else:
-        form = NewsAndEventsForm(instance=instance)
-    return render(
-        request,
-        "core/post_add.html",
-        {
-            "title": "Edit Post",
-            "form": form,
-        },
-    )
+        form = AdvertForm(instance=advert)
 
+    return render(request, "core/edit_advert.html", {"form": form, "advert": advert})
 
 @login_required
-@lecturer_required
-def delete_post(request, pk):
-    post = get_object_or_404(NewsAndEvents, pk=pk)
-    title = post.title
-    post.delete()
-    messages.success(request, (title + " has been deleted."))
-    return redirect("home")
-
+@advertiser_required
+def delete_advert(request, advert_id):
+    """ Advertisers can delete their adverts """
+    advert = get_object_or_404(Advert, id=advert_id)
+    advert.delete()
+    messages.success(request, "Advert deleted successfully.")
+    return redirect("dashboard")
 
 # ########################################################
-# Session
+# Helper Functions for Form Handling
 # ########################################################
-@login_required
-@lecturer_required
-def session_list_view(request):
-    """Show list of all sessions"""
-    sessions = Session.objects.all().order_by("-is_current_session", "-session")
-    return render(request, "core/session_list.html", {"sessions": sessions})
 
-
-@login_required
-@lecturer_required
-def session_add_view(request):
-    """check request method, if POST we add session otherwise show empty form"""
+def handle_bid_form(request, form, title, redirect_url):
     if request.method == "POST":
-        form = SessionForm(request.POST)
         if form.is_valid():
-            data = form.data.get(
-                "is_current_session"
-            )  # returns string of 'True' if the user selected Yes
-            print(data)
-            if data == "true":
-                sessions = Session.objects.all()
-                if sessions:
-                    for session in sessions:
-                        if session.is_current_session == True:
-                            unset = Session.objects.get(is_current_session=True)
-                            unset.is_current_session = False
-                            unset.save()
-                    form.save()
-                else:
-                    form.save()
-            else:
-                form.save()
-            messages.success(request, "Session added successfully. ")
-            return redirect("session_list")
-
-    else:
-        form = SessionForm()
-    return render(request, "core/session_update.html", {"form": form})
-
-
-@login_required
-@lecturer_required
-def session_update_view(request, pk):
-    session = Session.objects.get(pk=pk)
-    if request.method == "POST":
-        form = SessionForm(request.POST, instance=session)
-        data = form.data.get("is_current_session")
-        if data == "true":
-            sessions = Session.objects.all()
-            if sessions:
-                for session in sessions:
-                    if session.is_current_session == True:
-                        unset = Session.objects.get(is_current_session=True)
-                        unset.is_current_session = False
-                        unset.save()
-
-            if form.is_valid():
-                form.save()
-                messages.success(request, "Session updated successfully. ")
-                return redirect("session_list")
-        else:
-            form = SessionForm(request.POST, instance=session)
-            if form.is_valid():
-                form.save()
-                messages.success(request, "Session updated successfully. ")
-                return redirect("session_list")
-
-    else:
-        form = SessionForm(instance=session)
-    return render(request, "core/session_update.html", {"form": form})
-
-
-@login_required
-@lecturer_required
-def session_delete_view(request, pk):
-    session = get_object_or_404(Session, pk=pk)
-
-    if session.is_current_session:
-        messages.error(request, "You cannot delete current session")
-        return redirect("session_list")
-    else:
-        session.delete()
-        messages.success(request, "Session successfully deleted")
-    return redirect("session_list")
-
-
-# ########################################################
-
-
-# ########################################################
-# Semester
-# ########################################################
-@login_required
-@lecturer_required
-def semester_list_view(request):
-    semesters = Semester.objects.all().order_by("-is_current_semester", "-semester")
-    return render(
-        request,
-        "core/semester_list.html",
-        {
-            "semesters": semesters,
-        },
-    )
-
-
-@login_required
-@lecturer_required
-def semester_add_view(request):
-    if request.method == "POST":
-        form = SemesterForm(request.POST)
-        if form.is_valid():
-            data = form.data.get(
-                "is_current_semester"
-            )  # returns string of 'True' if the user selected Yes
-            if data == "True":
-                semester = form.data.get("semester")
-                ss = form.data.get("session")
-                session = Session.objects.get(pk=ss)
-                try:
-                    if Semester.objects.get(semester=semester, session=ss):
-                        messages.error(
-                            request,
-                            semester
-                            + " semester in "
-                            + session.session
-                            + " session already exist",
-                        )
-                        return redirect("add_semester")
-                except:
-                    semesters = Semester.objects.all()
-                    sessions = Session.objects.all()
-                    if semesters:
-                        for semester in semesters:
-                            if semester.is_current_semester == True:
-                                unset_semester = Semester.objects.get(
-                                    is_current_semester=True
-                                )
-                                unset_semester.is_current_semester = False
-                                unset_semester.save()
-                        for session in sessions:
-                            if session.is_current_session == True:
-                                unset_session = Session.objects.get(
-                                    is_current_session=True
-                                )
-                                unset_session.is_current_session = False
-                                unset_session.save()
-
-                    new_session = request.POST.get("session")
-                    set_session = Session.objects.get(pk=new_session)
-                    set_session.is_current_session = True
-                    set_session.save()
-                    form.save()
-                    messages.success(request, "Semester added successfully.")
-                    return redirect("semester_list")
-
             form.save()
-            messages.success(request, "Semester added successfully. ")
-            return redirect("semester_list")
-    else:
-        form = SemesterForm()
-    return render(request, "core/semester_update.html", {"form": form})
+            messages.success(request, f"{title} has been saved successfully.")
+            return redirect(redirect_url)
+    return render(request, "core/bid_form.html", {"form": form, "title": title})
 
-
-@login_required
-@lecturer_required
-def semester_update_view(request, pk):
-    semester = Semester.objects.get(pk=pk)
-    if request.method == "POST":
-        if (
-            request.POST.get("is_current_semester") == "True"
-        ):  # returns string of 'True' if the user selected yes for 'is current semester'
-            unset_semester = Semester.objects.get(is_current_semester=True)
-            unset_semester.is_current_semester = False
-            unset_semester.save()
-            unset_session = Session.objects.get(is_current_session=True)
-            unset_session.is_current_session = False
-            unset_session.save()
-            new_session = request.POST.get("session")
-            form = SemesterForm(request.POST, instance=semester)
-            if form.is_valid():
-                set_session = Session.objects.get(pk=new_session)
-                set_session.is_current_session = True
-                set_session.save()
-                form.save()
-                messages.success(request, "Semester updated successfully !")
-                return redirect("semester_list")
-        else:
-            form = SemesterForm(request.POST, instance=semester)
-            if form.is_valid():
-                form.save()
-                return redirect("semester_list")
-
-    else:
-        form = SemesterForm(instance=semester)
-    return render(request, "core/semester_update.html", {"form": form})
-
-
-@login_required
-@lecturer_required
-def semester_delete_view(request, pk):
-    semester = get_object_or_404(Semester, pk=pk)
-    if semester.is_current_semester:
-        messages.error(request, "You cannot delete current semester")
-        return redirect("semester_list")
-    else:
-        semester.delete()
-        messages.success(request, "Semester successfully deleted")
-    return redirect("semester_list")

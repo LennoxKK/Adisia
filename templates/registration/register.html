@@ -16,7 +16,7 @@
 	  {% csrf_token %}
 	  <div class="row">
 		  <div class="col-lg-6">
-			<h1 class="lead p-2 bg-light">Login Form</h1>
+			<h1 class="lead p-2 bg-light">Register Form</h1>
 			<div class="mb-3">
 				<label for="username_id" class="form-label">{{ form.username.label }}</label>
 				{{ form.username }}
@@ -57,14 +57,19 @@
 				<label for="gender_id" class="form-label">{{ form.gender.label }}</label>
 				{{ form.gender }}
 			</div>
+			
 			<div class="mb-3">
+                <label for="youtube_channel_name_id" class="form-label">{{ form.youtube_channel_name.label }}</label>
+                {{ form.youtube_channel_name }}
+            </div>
+			<!-- <div class="mb-3">
 				<label for="level_id" class="form-label">{{ form.level.label }}</label>
 				{{ form.level }}
 			</div>
 			<div class="mb-3">
 				<label for="program_id" class="form-label">{{ form.program.label }}</label>
 				{{ form.program }}
-			</div>
+			</div> -->
 		  </div>
 	  </div>
 

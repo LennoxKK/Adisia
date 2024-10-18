@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Search result for {{ query }} | Learning management system{% endblock title %}
+{% block title %}Search result for {{ query }} | ADISIA{% endblock title %}
 
 {% load class_name %}
 
@@ -43,9 +43,9 @@
     <hr>
     {% for object in object_list %}
         {% with object|class_name as klass %}
-        {% if klass == "Program" %}
+        {% if klass == "Pool" %}
             <div class="session-wrapper">
-                <div class="session"><div class="info-text bg-orange">Program</div></div>
+                <div class="session"><div class="info-text bg-orange">Pool</div></div>
             </div>
             <div class="col-12 class-item">
                 <!-- <p><b>Program of</b> {{ object }}</p> -->
@@ -53,9 +53,9 @@
                 <p>{{ object.summary }}</p>
             </div><hr>
 
-        {% elif klass == "Course" %}
+        {% elif klass == "Bid" %}
             <div class="session-wrapper">
-                <div class="session"><div class="info-text bg-orange">Course</div></div>
+                <div class="session"><div class="info-text bg-orange">Bid</div></div>
             </div>
             <div class="col-12 class-item">
                 <p><b>Program of</b> {{ object.program }}</p>
@@ -63,7 +63,7 @@
                 <p>{{ object.summary }}</p>
             </div><hr>
             
-        {% elif klass == "NewsAndEvents" %}
+        <!-- {% elif klass == "NewsAndEvents" %}
             <div class="session-wrapper">
                 <div class="session"><div class="info-text bg-orange">News And Events</div></div>
             </div>
@@ -94,7 +94,7 @@
                 <h4><a href="{{ object.get_absolute_url }}">{{ object }} | <b>{{ object|class_name }}</b></a></h4>
                 <p>{{ object.description }}</p>
             </div><hr>
-        {% endif %}
+        {% endif %} -->
 
         {% endwith %}
 
@@ -120,10 +120,10 @@
     <div class="col-12 pl-5">
     <h5>Search by:</h5>
     <ul class="pl-3">
-        <li>Program <span class="text-orange">&gt;</span> Title or Description</li>
-        <li>Course <span class="text-orange">&gt;</span> Title, Code or Description</li>
-        <li>News And Events <span class="text-orange">&gt;</span> Title, Description or just by typing "news" or "event"</li>
-        <li>Quiz <span class="text-orange">&gt;</span> Title, Description or Category(practice, assignment and exam)</li>
+        <li>Pool <span class="text-orange">&gt;</span> Title or Description</li>
+        <li>Bid<span class="text-orange">&gt;</span> Title, Code or Description</li>
+        <!-- <li>News And Events <span class="text-orange">&gt;</span> Title, Description or just by typing "news" or "event"</li>
+        <li>Quiz <span class="text-orange">&gt;</span> Title, Description or Category(practice, assignment and exam)</li> -->
     </ul>
     </div>
 </div>

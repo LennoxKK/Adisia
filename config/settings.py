@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 from decouple import config
 
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -27,7 +29,7 @@ SECRET_KEY = config(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = ["127.0.0.1", "adilmohak1.pythonanywhere.com"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost",config("HOST"),"https://kp42gn3p-8000.uks1.devtunnels.ms/"]
 
 # change the default user models to our custom model
 AUTH_USER_MODEL = "accounts.User"
@@ -51,7 +53,18 @@ THIRD_PARTY_APPS = [
     "crispy_bootstrap5",
     "rest_framework",
     "django_filters",
+    "corsheaders",
+    "drf_spectacular",
+    "rest_framework.authtoken",  # Added comma
+    "social_django",  # Fixed with comma
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True  # Allows all origins, good for testing only
+
 
 # Custom apps
 PROJECT_APPS = [
@@ -76,7 +89,15 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # whitenoise to serve static files
+    "corsheaders.middleware.CorsMiddleware",
+    'social_django.middleware.SocialAuthExceptionMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    config("FULL_HOST")
+]
+
 
 ROOT_URLCONF = "config.urls"
 
@@ -91,6 +112,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                  "social_django.context_processors.backends",  # Adds available authentication backends
                 # 'django.template.context_processors.i18n',
                 # 'django.template.context_processors.media',
                 # 'django.template.context_processors.static',
@@ -190,18 +212,19 @@ EMAIL_USE_SSL = False
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
 
 # DRF setup
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
+        'rest_framework.permissions.AllowAny',
     ],
+    
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ],
+     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', 
 }
 
 # Strip payment config
@@ -234,6 +257,35 @@ LOGGING = {
 
 # WhiteNoise configuration
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Configuration for ID prefixes
+CONTENT_CREATOR_ID_PREFIX = config("CONTENT_CREATOR_ID_PREFIX", "cust") 
+ADVERTISER_ID_PREFIX = config("ADVERTISER_ID_PREFIX", "advt")  
 
-STUDENT_ID_PREFIX = config("STUDENT_ID_PREFIX", "ugr")
-LECTURER_ID_PREFIX = config("LECTURER_ID_PREFIX", "lec")
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'My Project API',
+    'DESCRIPTION': 'API documentation for My Project',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,  # Whether to include schema in documentation
+}
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.github.GithubOAuth2',
+     'allauth.account.auth_backends.AuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
+SITE_ID = 1  # Adjust according to your site setup
+
+# Add any necessary configurations for social authentication
+LOGIN_REDIRECT_URL = '/'
+
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+LOGOUT_REDIRECT_URL = '/accounts/login'
